@@ -30,6 +30,9 @@ setuptools.setup(
         "Operating System :: OS Independent",
 
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     py_modules=["mlimputer"],
     packages=setuptools.find_packages(where="src"),
