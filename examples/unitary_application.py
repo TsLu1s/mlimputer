@@ -1,35 +1,36 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from mlimputer.imputation import MLimputer
-import mlimputer.model_selection as ms
-import mlimputer.parameters as params
+
+from mlimputer.imputation import MLimputer 
+import mlimputer.parameters as params      
+
 import warnings
 warnings.filterwarnings("ignore", category=Warning) #-> For a clean console
 
 ## Dataset Selection
-sel_dataset="Dataset 1" # "Dataset 2" , "Dataset 3"
+sel_dataset = "Dataset 1" # "Dataset 2" , "Dataset 3"
 
 ########################################## Dataset 1
-if sel_dataset=="Dataset 1":
+if sel_dataset == "Dataset 1":
     # Source Data: https://www.openml.org/search?type=datastatus=activeid=41506
-    data=pd.read_csv('https://raw.githubusercontent.com/TsLu1s/MLimputer/main/data/NewFuelCar.csv', encoding='latin', delimiter=',')
+    data = pd.read_csv('https://raw.githubusercontent.com/TsLu1s/MLimputer/main/data/NewFuelCar.csv', encoding='latin', delimiter=',')
     data = data.drop('X', axis=1)
-    target="Tmax"
+    target = "Tmax"
 
 ########################################## Dataset 2
 
-elif sel_dataset=="Dataset 2":
+elif sel_dataset == "Dataset 2":
     # Source Data: "https://www.kaggle.com/datasets/fedesoriano/body-fat-prediction-dataset"
     data=pd.read_csv('https://github.com/TsLu1s/MLimputer/raw/main/data/body_measurement.csv', encoding='latin', delimiter=',') 
     target="BodyFat"
 
 ########################################## Dataset 3
 
-elif sel_dataset=="Dataset 3":
+elif sel_dataset == "Dataset 3":
     # Source Data: "https://www.kaggle.com/code/sagardubey3/admission-prediction-with-linear-regression"
-    data=pd.read_csv('https://raw.githubusercontent.com/TsLu1s/MLimputer/main/data/Admission_Predict.csv', encoding='latin', delimiter=',') 
-    target="Chance of Admit "
+    data = pd.read_csv('https://raw.githubusercontent.com/TsLu1s/MLimputer/main/data/Admission_Predict.csv', encoding='latin', delimiter=',') 
+    target = "Chance of Admit "
     
 sel_cols = [col for col in data.columns if col != target] + [target]
 data = data[sel_cols]
@@ -40,18 +41,18 @@ for col in sel_cols[:-1]:
 
 data = data[data[target].isnull()==False]
 data = data.reset_index(drop=True)
+# Important Note: If Classification, target should be categorical.  -> data[target]=data[target].astype('object')
 
 train,test = train_test_split(data, train_size=0.8) 
 train,test = train.reset_index(drop=True), test.reset_index(drop=True) # <- Required
 train.isna().sum(), test.isna().sum()
 
-
 # All model imputation options ->  "RandomForest","ExtraTrees","GBR","KNN","XGBoost","Lightgbm","Catboost"
 
 # Customizing Hyperparameters Example
-hparameters=params.imputer_parameters()
+hparameters = params.imputer_parameters()
 print(hparameters)
-hparameters["KNN"]["n_neighbors"]=5
+hparameters["KNN"]["n_neighbors"] = 5
 hparameters["RandomForest"]["n_estimators"] = 30
     
 # Imputation Example 1 : KNN
@@ -68,17 +69,11 @@ mli.fit_imput(X=train)
 train_rf = mli.transform_imput(X=train)
 test_rf = mli.transform_imput(X=test)
     
+
 #(...)
-    
-## Performance Evaluation Regression - Imputation CrossValidation Example
 
-from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
-from catboost import CatBoostRegressor
-        
-leaderboard_knn_imp=ms.cross_validation(X = train_knn,
-                                        target = target, 
-                                        test_size = 0.2,
-                                        n_splits = 3,
-                                        models = [LinearRegression(), RandomForestRegressor(), CatBoostRegressor()])
+## Export Imputation Metadata
 
+#import pickle 
+#output = open("imputer_rf.pkl", 'wb')
+#pickle.dump(mli, output)

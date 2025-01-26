@@ -1,20 +1,85 @@
 import pandas as pd
+from typing import Dict
 from tqdm import tqdm
 from atlantic.processing.encoders import AutoLabelEncoder
 from atlantic.imputers.imputation import AutoSimpleImputer
-from mlimputer.parameters import imputer_parameters
-from mlimputer.model_selection import missing_report, imput_models
+from mlimputer.parameters import imputer_parameters                         
+from mlimputer.model_selection import imput_models          
 
 parameters=imputer_parameters()
 
 class MLimputer:
+    """
+    A supervised machine learning imputation class for handling numerical missing values.
+    The class uses a two-step approach:
+    1. Initial simple imputation for input features
+    2. ML model-based imputation for target columns with missing values
+    
+    Attributes:
+        imput_model (str): Name of the ML model to use for imputation
+        imputer_configs (dict): Configuration parameters for the imputation models
+        imp_config (dict): Storage for fitted imputers and preprocessors
+        numeric_dtypes (set): Set of supported numerical datatypes
+        _is_fitted (bool): Flag to track if the imputer has been fitted
+    """
     def __init__ (self, 
                   imput_model : str,
                   imputer_configs : dict=parameters):
+
         self.imput_model = imput_model
         self.imputer_configs = imputer_configs
         self.imp_config = {}
+        self.numeric_dtypes = {'int16', 'int32', 'int64', 'float16', 'float32', 'float64'}
+        self._is_fitted = False
         self.encoder = None
+    
+    def _validate_input(self, X: pd.DataFrame, method: str) -> None:
+        """
+        Validate input DataFrame.
+        
+        Args:
+            X: Input DataFrame
+            method: Method name for error messages ('fit' or 'transform')
+            
+        Raises:
+            ValueError: For invalid inputs
+            TypeError: For incorrect data types
+        """
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError("Input must be a pandas DataFrame")
+            
+        if X.empty:
+            raise ValueError("Input DataFrame is empty")
+            
+        if method == 'transform' and not self._is_fitted:
+            raise ValueError("MLimputer must be fitted before transform")
+            
+        # Check for columns with all null values
+        null_cols = X.columns[X.isnull().all()].tolist()
+        if null_cols:
+            raise ValueError(f"Columns {null_cols} contain all null values")
+    
+    def _get_missing_columns(self, X: pd.DataFrame) -> pd.DataFrame:
+        """
+        Get report of columns with missing values.
+        
+        Args:
+            X: Input DataFrame
+            
+        Returns:
+            DataFrame with missing value statistics
+        """
+        num_cols = X.select_dtypes(include=self.numeric_dtypes).columns
+        missing_stats = pd.DataFrame({
+            'null_count': X[num_cols].isna().sum()[X[num_cols].isna().sum() > 0]
+        })
+        
+        if missing_stats.empty:
+            return pd.DataFrame()
+            
+        missing_stats['null_percentage'] = missing_stats['null_count'] / len(X)
+        missing_stats['columns'] = missing_stats.index
+        return missing_stats.sort_values('null_percentage', ascending=True).reset_index(drop=True)
     
     def fit_imput(self, 
                   X:pd.DataFrame):
@@ -27,14 +92,14 @@ class MLimputer:
         
         """
         
+        self._validate_input(X, method='fit')
         X_ = X.copy()
         
-        X_md ,c = missing_report(X_) ,0
-        imp_targets = list(X_md['columns']) 
-        
-        for col in X_.columns:
-            if X_[col].isnull().all():
-                raise ValueError(f'Column {col} is filled with null values')
+        missing_report = self._get_missing_columns(X_)
+        if missing_report.empty:
+            raise ValueError("No missing values found in numerical columns")
+            
+        imp_targets = missing_report['columns'].tolist()
         
         # Iterate over each column with missing data and fit the imputation method
         for target in tqdm(imp_targets, 
@@ -69,20 +134,12 @@ class MLimputer:
                                  parameters = self.imputer_configs,
                                  algo = self.imput_model)
             
-            # Store the fitted model information in a dictionary
-            if c == 0:
-                self.imp_config = {target:{'model_name' : self.imput_model,
-                                           'model' : model,
-                                           'pre_process' : self.encoder,
-                                           'imputer' : simple_imputer}}
-            elif c > 0:
-                imp_config_2 = {target:{'model_name' : self.imput_model,
-                                        'model' : model,
-                                        'pre_process' : self.encoder,
-                                        'imputer' : simple_imputer}}
-                self.imp_config.update(imp_config_2)
-            c+=1
-            
+            # Store fitted components
+            self.imp_config[target] = {'model' : model,
+                                       'pre_process' : self.encoder,
+                                       'imputer' : simple_imputer}
+        
+        self._is_fitted = True
         return self
     
     def transform_imput(self,
@@ -100,9 +157,10 @@ class MLimputer:
         X_: pd.DataFrame
             The original X with missing values imputed.
         """
-        X_ ,imp_cols = X.copy() ,list(self.imp_config.keys()) 
+        self._validate_input(X, method='transform')
+        X_ = X.copy()
         
-        for col in tqdm(imp_cols, desc = "Imputing Missing Data", ncols = 80):
+        for col in tqdm(list(self.imp_config.keys()) , desc = "Imputing Missing Data", ncols = 80):
             
             target = col
             test_index = X_[X_[target].isnull()].index.tolist()
@@ -110,10 +168,11 @@ class MLimputer:
             
             encoder = self.imp_config[target]['pre_process']
             # Transform the DataFrame using Label
-            if encoder is not None: test = encoder.transform(X=test)
+            if encoder is not None: 
+                test = encoder.transform(X=test)
             
             # Impute the DataFrame using Simple Imputer
-            simple_imputer=self.imp_config[target]['imputer']
+            simple_imputer = self.imp_config[target]['imputer']
             test = simple_imputer.transform(test.copy())  
             
             sel_cols = [col for col in test.columns if col != target] + [target]
@@ -127,3 +186,19 @@ class MLimputer:
             X_[target].iloc[test_index] = y_predict
     
         return X_
+
+    def get_model_info(self) -> Dict[str, Dict]:
+        """
+        Get information about fitted models and their configurations.
+        
+        Returns:
+            Dictionary containing model configurations and statistics
+        """
+        if not self._is_fitted:
+            raise ValueError("MLimputer must be fitted first")
+            
+        return {
+            'imputation_model': self.imput_model,
+            'imputated_columns': list(self.imp_config.keys()),
+            'model_configs': self.imputer_configs[self.imput_model]
+        }

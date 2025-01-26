@@ -20,7 +20,7 @@
 
 <br>
 <p align="center">
-  <h2 align="center"> MLimputer: Missing Data Imputation Framework for Supervised Machine Learning
+  <h2 align="center"> MLimputer: Missing Data Imputation Framework for Machine Learning
   <br>
   
 ## Framework Contextualization <a name = "ta"></a>
@@ -56,7 +56,7 @@ To install this package from Pypi repository run the following command:
 pip install mlimputer
 ```
 
-# Usage Examples
+# MLImputer - Usage Examples
     
 The first needed step after importing the package is to load a dataset (split it) and define your choosen imputation model.
 The imputation model options for handling the missing data in your dataset are the following:
@@ -88,6 +88,7 @@ import warnings
 warnings.filterwarnings("ignore", category=Warning) #-> For a clean console
 
 data = pd.read_csv('csv_directory_path') # Dataframe Loading Example
+# Important note: If Classification, target should be categorical.  -> data[target]=data[target].astype('object')
 
 train,test = train_test_split(data, train_size=0.8)
 train,test = train.reset_index(drop=True), test.reset_index(drop=True) # <- Required
@@ -116,27 +117,62 @@ train_rf = mli_rf.transform_imput(X = train)
 test_rf = mli_rf.transform_imput(X = test)
     
 #(...)
-    
-## Performance Evaluation Regression - Imputation CrossValidation Example
-
-from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
-from catboost import CatBoostRegressor
-        
-leaderboard_rf_imp=ms.cross_validation(X = train_rf,
-                                       target = "Target_Name_Col", 
-                                       test_size = 0.2,
-                                       n_splits = 3,
-                                       models = [LinearRegression(), RandomForestRegressor(), CatBoostRegressor()])
 
 ## Export Imputation Metadata
-
-# Imputation Metadata
 import pickle 
 output = open("imputer_rf.pkl", 'wb')
 pickle.dump(mli_rf, output)
 
-```  
+```
+
+## Performance Evaluation
+The MLimputer framework includes a robust evaluation module that enables users to assess and compare the performance of different imputation strategies. This evaluation process is crucial for selecting the most effective imputation approach for your specific dataset and use case.
+
+### Evaluation Process Overview
+The framework implements a comprehensive two-stage evaluation approach:
+1. Cross-Validation Assessment: Evaluates multiple imputation models using k-fold cross-validation to ensure robust performance metrics.
+2. Test Set Validation: Validates the selected imputation strategy on a separate test set to confirm generalization capability.
+
+### Implementation Example:
+The following example demonstrates how to evaluate imputation models and select the best performing approach for your data:
+
+```py
+import mlimputer.evaluation as Evaluator                   
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.tree import DecisionTreeClassifier
+from xgboost import XGBRegressor
+
+# Define evaluation parameters
+imputation_models = ["RandomForest", "ExtraTrees", "GBR", "KNN",]
+                    #"XGBoost", "Lightgbm", "Catboost"]   # List of imputation models to evaluate
+n_splits = 3  # Number of splits for cross-validation
+
+# Selected models for classification and regression
+if train[target].dtypes == "object":                                      
+            models = [RandomForestClassifier(), DecisionTreeClassifier()]
+else:
+    models = [XGBRegressor(), RandomForestRegressor()]
+
+# Initialize the evaluator
+evaluator = Evaluator(
+    imputation_models = imputation_models,  
+    train = train,
+    target = target,
+    n_splits = n_splits,     
+    hparameters = hparameters)
+
+# Perform evaluations
+cv_results = evaluator.evaluate_imputation_models(
+    models = models)
+
+best_imputer = evaluator.get_best_imputer()  # Get best-performing imputation model
+
+test_results = evaluator.evaluate_test_set(
+    test = test,
+    imput_model = best_imputer,
+    models = models)
+
+```
     
 ## License
 
