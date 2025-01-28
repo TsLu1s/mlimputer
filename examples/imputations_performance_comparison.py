@@ -92,13 +92,6 @@ else:
     models = [XGBRegressor(), RandomForestRegressor()]
 
 
-# Selected models for classification and regression
-if train[target].dtypes == "object":                                      
-            models = [RandomForestClassifier(), DecisionTreeClassifier()]
-else:
-    models = [XGBRegressor(), RandomForestRegressor()]
-
-
 # Initialize the evaluator
 evaluator = Evaluator(
     imputation_models = imputation_models,  
