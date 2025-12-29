@@ -296,7 +296,7 @@ A complete walkthrough demonstrating fundamental imputation workflow:
 - Imputation and evaluation
 - Saving fitted models for production
 
-[View Basic Example](examples/basic_usage.py) 
+[View Basic Example](https://github.com/TsLu1s/mlimputer/blob/main/examples/basic_usage.py) 
 
 ### 2. Performance Evaluation Example
 Comprehensive evaluation comparing multiple imputation strategies:
@@ -306,7 +306,7 @@ Comprehensive evaluation comparing multiple imputation strategies:
 - Best model selection based on metrics
 - Production deployment preparation
 
-[View Evaluation Example](examples/evaluation_example.py)
+[View Evaluation Example](https://github.com/TsLu1s/mlimputer/blob/main/examples/performance_evaluation.py)
 
 ## Contributing
 
