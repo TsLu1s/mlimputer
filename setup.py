@@ -1,21 +1,20 @@
 import setuptools
-# read the contents of your README file
 from pathlib import Path
+
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 setuptools.setup(
     name="mlimputer",
-    version="1.0.80",
+    version="2.0.20",
     description="MLimputer - Missing Data Imputation Framework for Machine Learning",
-    long_description=long_description,      
+    long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/TsLu1s/MLimputer",
-    author="Luís Santos",
+    author="Luís Fernando da Silva Santos",
     author_email="luisf_ssantos@hotmail.com",
     license="MIT",
     classifiers=[
-        # Indicate who your project is intended for
         "Intended Audience :: Education",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
@@ -29,22 +28,27 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
 
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     py_modules=["mlimputer"],
     packages=setuptools.find_packages(where="src"),
     package_dir={"": "src"},  
     keywords=[
-        "data science",
         "machine learning",
-        "data preprecessing",
-        "null imputation",
-        "predictive null imputation",
-        "multiple null imputation",
-        "automated machine learning",
-    ],           
+        "missing data imputation",
+        "data preprocessing",
+        "supervised learning",
+        "predictive imputation",
+        "multivariate imputation",
+        "random forest imputation",
+        "gradient boosting imputation",
+        "knn imputation",
+        "automated imputation",
+        "missing values",
+        "data science",
+        "ml pipeline",
+    ],         
     install_requires=open("requirements.txt").readlines(),
 )

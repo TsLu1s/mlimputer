@@ -12,7 +12,7 @@
 [license-shield]: https://img.shields.io/github/license/TsLu1s/MLimputer.svg?style=for-the-badge&logo=opensource&logoColor=white
 [license-url]: https://github.com/TsLu1s/MLimputer/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/luísfssantos/
+[linkedin-url]: https://www.linkedin.com/in/luisfssantos98/
 [downloads-shield]: https://static.pepy.tech/personalized-badge/mlimputer?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Total%20Downloads
 [downloads-url]: https://pepy.tech/project/mlimputer
 [downloads-month-shield]: https://static.pepy.tech/personalized-badge/mlimputer?period=month&units=international_system&left_color=grey&right_color=blue&left_text=Month%20Downloads
@@ -23,151 +23,309 @@
   <h2 align="center"> MLimputer: Missing Data Imputation Framework for Machine Learning
   <br>
   
-## Framework Contextualization <a name = "ta"></a>
+## Framework Contextualization: Advanced Missing Data Imputation for Tabular Data
 
-The `MLimputer` project constitutes an complete and integrated pipeline to automate the handling of missing values in datasets through regression prediction and aims at reducing bias and increase the precision of imputation results when compared to more classic imputation methods.
-This package provides multiple algorithm options to impute your data, in which every observed data column with existing missing values is fitted with a robust preprocessing approach and subsequently predicted.
+The `MLimputer` project provides a comprehensive and integrated framework to automate the handling of missing values in datasets through advanced machine learning imputation. It aims to reduce bias and increase the precision of imputation results compared to traditional methods by leveraging supervised learning algorithms.
 
-The architecture design includes three main sections, these being: missing data analysis, data preprocessing and supervised model imputation which are organized in a customizable pipeline structure.
+This package offers multiple algorithm options to impute your data, where each column with missing values is predicted using robust preprocessing and state-of-the-art machine learning models.
 
-This project aims at providing the following application capabilities:
+The architecture includes three main components:
+* **Missing Data Analysis**: Automatic detection and pattern analysis of missing values
+* **Data Preprocessing**: Intelligent handling of categorical and numerical features
+* **Supervised Model Imputation**: Multiple ML algorithms for accurate value prediction
 
-* General applicability on tabular datasets: The developed imputation procedures are applicable on any data table associated with any Supervised ML scopes, based on missing data columns to be imputed.
-    
-* Robustness and improvement of predictive results: The application of the MLimputer preprocessing aims at improve the predictive performance through customization and optimization of existing missing values imputation in the dataset input columns. 
-   
-#### Main Development Tools <a name = "pre1"></a>
+### Key Capabilities
 
-Major frameworks used to built this project: 
+* **General applicability on tabular datasets**: Works with any tabular data for both regression and classification tasks
+* **Robust preprocessing**: Automatic handling of categorical encoding and feature scaling
+* **Multiple imputation strategies**: Choose from 7 different ML algorithms based on your data characteristics
+* **Performance evaluation**: Built-in evaluation framework to compare and select the best imputation strategy
+* **Production ready**: Save and load fitted imputers for deployment
 
-* [Pandas](https://pandas.pydata.org/)
-* [Sklearn](https://scikit-learn.org/stable/)
-* [CatBoost](https://catboost.ai/)
-    
-## Where to get it <a name = "ta"></a>
-    
-Binary installer for the latest released version is available at the Python Package Index [(PyPI)](https://pypi.org/project/mlimputer/).   
+### Main Development Tools
 
-## Installation  
+Major frameworks used to build this project:
+* [Pandas](https://pandas.pydata.org/) - Data manipulation and analysis
+* [Scikit-learn](https://scikit-learn.org/stable/) - Core ML algorithms
+* [XGBoost](https://xgboost.ai/) - Gradient boosting
+* [CatBoost](https://catboost.ai/) - Gradient boosting with categorical support
+* [Pydantic](https://pydantic-docs.helpmanual.io/) - Data validation
 
-To install this package from Pypi repository run the following command:
+## Installation
 
-```
+Binary installer for the latest released version is available at the Python Package Index [(PyPI)](https://pypi.org/project/mlimputer/).
+
+```bash
 pip install mlimputer
 ```
 
-# MLImputer - Usage Examples
-    
-The first needed step after importing the package is to load a dataset (split it) and define your choosen imputation model.
-The imputation model options for handling the missing data in your dataset are the following:
-* `RandomForest`
-* `ExtraTrees`
-* `GBR`
-* `KNN`
-* `XGBoost`
-* `Lightgbm`
-* `Catboost`
+GitHub Project Link: [https://github.com/TsLu1s/MLimputer](https://github.com/TsLu1s/MLimputer)
 
-After creating a `MLimputer` object with your imputation selected model, you can then fit the missing data through the `fit_imput` method. From there you can impute the future datasets with `transform_imput` (validate, test ...) with the same data properties. Note, as it shows in the example bellow, you can also customize your model imputer parameters by changing it's configurations and then, implementing them in the `imputer_configs` parameter.
+## Quick Start Guide
 
-Through the `cross_validation` function you can also compare the predictive performance evalution of multiple imputations, allowing you to validate which imputation model fits better your future predictions.
+### Basic Usage Example
 
-```py
+The first step is to import the package, load your dataset, and choose an imputation model. Available imputation models are:
+* `RandomForest` 
+* `ExtraTrees` 
+* `GBR` 
+* `KNN` 
+* `XGBoost` 
+* `Catboost` 
 
-from mlimputer.imputation import MLimputer
-import mlimputer.model_selection as ms
-from mlimputer.parameters import imputer_parameters
+```python
 import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
+from mlimputer import MLimputer
+from mlimputer.schemas.parameters import imputer_parameters
+from mlimputer.utils.splitter import DataSplitter
 import warnings
-warnings.filterwarnings("ignore", category=Warning) #-> For a clean console
+warnings.filterwarnings("ignore")
 
-data = pd.read_csv('csv_directory_path') # Dataframe Loading Example
-# Important note: If Classification, target should be categorical.  -> data[target]=data[target].astype('object')
+# Load your data
+data = pd.read_csv('your_dataset.csv')
 
-train,test = train_test_split(data, train_size=0.8)
-train,test = train.reset_index(drop=True), test.reset_index(drop=True) # <- Required
+# Split with automatic index reset (required for MLimputer)
+splitter = DataSplitter(random_state=42)
+X_train, X_test, y_train, y_test = splitter.split(
+    data.drop(columns=['target']), 
+    data['target'], 
+    test_size=0.2
+)
 
-# All model imputation options ->  "RandomForest","ExtraTrees","GBR","KNN","XGBoost","Lightgbm","Catboost"
+# Configure imputation parameters (optional)
+params = imputer_parameters()
+params["RandomForest"]["n_estimators"] = 50
+params["RandomForest"]["max_depth"] = 10
 
-# Customizing Hyperparameters Example
+# Create and fit imputer
+imputer = MLimputer(imput_model="RandomForest", imputer_configs=params)
+imputer.fit(X=X_train)
 
-hparameters = imputer_parameters()
-print(hparameters)
-hparameters["KNN"]["n_neighbors"] = 5
-hparameters["RandomForest"]["n_estimators"] = 30
-    
-# Imputation Example 1 : KNN
+# Transform datasets
+X_train_imputed = imputer.transform(X=X_train)
+X_test_imputed = imputer.transform(X=X_test)
 
-mli_knn = MLimputer(imput_model = "KNN", imputer_configs = hparameters)
-mli_knn.fit_imput(X = train)
-train_knn = mli_knn.transform_imput(X = train)
-test_knn = mli_knn.transform_imput(X = test)
+# Save fitted imputer for production use
+import pickle
+with open("fitted_imputer.pkl", 'wb') as f:
+    pickle.dump(imputer, f)
+```
 
-# Imputation Example 2 : RandomForest
+### Advanced Configuration
 
-mli_rf = MLimputer(imput_model = "RandomForest", imputer_configs = hparameters)
-mli_rf.fit_imput(X = train)
-train_rf = mli_rf.transform_imput(X = train)
-test_rf = mli_rf.transform_imput(X = test)
-    
-#(...)
+Customize imputation model hyperparameters for better performance:
 
-## Export Imputation Metadata
-import pickle 
-output = open("imputer_rf.pkl", 'wb')
-pickle.dump(mli_rf, output)
+```python
+from mlimputer.schemas.parameters import imputer_parameters, update_model_config
 
+# Get default parameters
+params = imputer_parameters()
+
+# Method 1: Direct modification
+params["KNN"]["n_neighbors"] = 7
+params["KNN"]["weights"] = "distance"
+
+# Method 2: Using update function with validation
+params["RandomForest"] = update_model_config(
+    "RandomForest",
+    {"n_estimators": 100, "max_depth": 15, "min_samples_split": 5}
+)
+
+# Apply different strategies
+strategies = ["RandomForest", "KNN", "XGBoost"]
+for strategy in strategies:
+    imputer = MLimputer(imput_model=strategy, imputer_configs=params)
+    imputer.fit(X=X_train)
+    print(f"{strategy}: {imputer.get_summary()['n_columns_imputed']} columns imputed")
 ```
 
 ## Performance Evaluation
-The MLimputer framework includes a robust evaluation module that enables users to assess and compare the performance of different imputation strategies. This evaluation process is crucial for selecting the most effective imputation approach for your specific dataset and use case.
 
-### Evaluation Process Overview
-The framework implements a comprehensive two-stage evaluation approach:
-1. Cross-Validation Assessment: Evaluates multiple imputation models using k-fold cross-validation to ensure robust performance metrics.
-2. Test Set Validation: Validates the selected imputation strategy on a separate test set to confirm generalization capability.
+The MLimputer framework includes a robust evaluation module to assess and compare different imputation strategies. This helps you select the most effective approach for your specific dataset.
 
-### Implementation Example:
-The following example demonstrates how to evaluate imputation models and select the best performing approach for your data:
+### Evaluation Framework
 
-```py
-import mlimputer.evaluation as Evaluator                   
+```python
+from mlimputer.evaluation.evaluator import Evaluator
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.tree import DecisionTreeClassifier
-from xgboost import XGBRegressor
+from sklearn.linear_model import LogisticRegression, LinearRegression
 
 # Define evaluation parameters
-imputation_models = ["RandomForest", "ExtraTrees", "GBR", "KNN",]
-                    #"XGBoost", "Lightgbm", "Catboost"]   # List of imputation models to evaluate
-n_splits = 3  # Number of splits for cross-validation
+imputation_strategies = ["RandomForest", "ExtraTrees", "GBR", "KNN"]
 
-# Selected models for classification and regression
-if train[target].dtypes == "object":                                      
-            models = [RandomForestClassifier(), DecisionTreeClassifier()]
-else:
-    models = [XGBRegressor(), RandomForestRegressor()]
+# Choose models based on your task
+if target.dtype == "object":  # Classification
+    models = [
+        LogisticRegression(max_iter=1000),
+        RandomForestClassifier(n_estimators=50)
+    ]
+else:  # Regression
+    models = [
+        LinearRegression(),
+        RandomForestRegressor(n_estimators=50)
+    ]
 
-# Initialize the evaluator
+# Initialize evaluator
 evaluator = Evaluator(
-    imputation_models = imputation_models,  
-    train = train,
-    target = target,
-    n_splits = n_splits,     
-    hparameters = hparameters)
+    imputation_models=imputation_strategies,
+    train=train_data,
+    target="target_column",
+    n_splits=3,  # Cross-validation folds
+    hparameters=params
+)
 
-# Perform evaluations
-cv_results = evaluator.evaluate_imputation_models(
-    models = models)
+# Run cross-validation evaluation
+cv_results = evaluator.evaluate_imputation_models(models=models)
 
-best_imputer = evaluator.get_best_imputer()  # Get best-performing imputation model
+# Get best performing imputation strategy
+best_imputer = evaluator.get_best_imputer()
+print(f"Best imputation strategy: {best_imputer}")
 
+# Evaluate on test set
 test_results = evaluator.evaluate_test_set(
-    test = test,
-    imput_model = best_imputer,
-    models = models)
+    test=test_data,
+    imput_model=best_imputer,
+    models=models
+)
+```
 
+### Custom Cross-Validation
+
+For more control over the evaluation process:
+
+```python
+from mlimputer.evaluation.cross_validation import CrossValidator, CrossValidationConfig
+
+# Configure custom cross-validation
+custom_config = CrossValidationConfig(
+    n_splits=5,
+    shuffle=True,
+    random_state=42,
+    verbose=1
+)
+
+# Create validator
+validator = CrossValidator(config=custom_config)
+
+# Run validation
+results = validator.validate(
+    X=X_imputed,
+    target='target',
+    y=y,
+    models=models,
+    problem_type="regression"  # or "binary_classification", "multiclass_classification"
+)
+
+# Get leaderboard
+leaderboard = validator.get_leaderboard()
+print(leaderboard.head())
+```
+
+## Working with Generated Data
+
+MLimputer includes utilities for generating datasets with missing values for testing:
+
+```python
+from mlimputer.data.dataset_generator import ImputationDatasetGenerator
+
+generator = ImputationDatasetGenerator(random_state=42)
+
+# Regression dataset
+X_reg, y_reg = generator.quick_regression(
+    n_samples=2000, 
+    missing_rate=0.15
+)
+
+# Binary classification
+X_bin, y_bin = generator.quick_binary(
+    n_samples=2000, 
+    missing_rate=0.15
+)
+
+# Multiclass classification
+X_multi, y_multi = generator.quick_multiclass(
+    n_samples=2000,
+    n_classes=4,
+    missing_rate=0.15,
+    n_categorical=3  # Include categorical features
+)
+```
+
+## Production Deployment
+
+### Saving and Loading Models
+```python
+from mlimputer.utils.serialization import ModelSerializer
+
+# Save with metadata
+ModelSerializer.save(
+    obj=imputer,
+    filepath="production_imputer.joblib",
+    format="joblib",
+    metadata={
+        "model": "RandomForest",
+        "train_shape": X_train.shape,
+        "version": "1.0"
+    }
+)
+
+# Load with metadata
+loaded_imputer, metadata = ModelSerializer.load_with_metadata(
+    filepath="production_imputer.joblib",
+    format="joblib"
+)
+
+# Use loaded imputer on new data
+new_data_imputed = loaded_imputer.transform(new_data)
+```
+
+## Important Notes
+
+* **Index Reset Required**: Always use `DataSplitter` or reset indices manually after splitting data
+* **Categorical Handling**: The framework automatically detects and encodes categorical columns
+* **Missing Pattern Preservation**: The imputer learns missing patterns from training data for consistent imputation
+* **Memory Efficient**: Large datasets are processed in batches automatically
+
+## Example Notebooks
+
+### 1. Basic Usage Example
+A complete walkthrough demonstrating fundamental imputation workflow:
+- Dataset generation with controlled missing patterns
+- Train/test splitting with automatic index handling  
+- Model configuration and fitting
+- Imputation and evaluation
+- Saving fitted models for production
+
+[View Basic Example](examples/basic_usage.py) 
+
+### 2. Performance Evaluation Example
+Comprehensive evaluation comparing multiple imputation strategies:
+- Cross-validation setup for robust evaluation
+- Comparison of 7 different imputation algorithms
+- Custom evaluation configurations
+- Best model selection based on metrics
+- Production deployment preparation
+
+[View Evaluation Example](examples/evaluation_example.py)
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Citation
+
+If you use MLimputer in your research, please cite:
+```bibtex
+@software{mlimputer,
+  author = {Luis Fernando Santos},
+  title = {MLimputer: Missing Data Imputation Framework for Supervised Machine Learning},
+  year = {2023},
+  url = {https://github.com/TsLu1s/MLimputer}
+}
 ```
     
 ## License
@@ -176,4 +334,5 @@ Distributed under the MIT License. See [LICENSE](https://github.com/TsLu1s/TSFor
 
 ## Contact 
  
-Luis Santos - [LinkedIn](https://www.linkedin.com/in/lu%C3%ADsfssantos/)
+Luis Santos - [LinkedIn](https://www.linkedin.com/in/luisfssantos98/)
+
