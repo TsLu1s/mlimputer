@@ -9,8 +9,8 @@ from mlimputer.schemas.parameters import imputer_parameters
 from mlimputer.utils.logging import logger
 
 
-__version__ = "2.0.0"
-__author__ = "Luís Santos"
+__version__ = "2.0.26"
+__author__ = "Luís Fernando Santos"
 
 __all__ = [
     "MLimputer",

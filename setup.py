@@ -6,7 +6,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setuptools.setup(
     name="mlimputer",
-    version="2.0.21",
+    version="2.0.22",
     description="MLimputer - Missing Data Imputation Framework for Machine Learning",
     long_description=long_description,
     long_description_content_type="text/markdown",
