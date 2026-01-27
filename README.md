@@ -284,7 +284,6 @@ new_data_imputed = loaded_imputer.transform(new_data)
 * **Index Reset Required**: Always use `DataSplitter` or reset indices manually after splitting data
 * **Categorical Handling**: The framework automatically detects and encodes categorical columns
 * **Missing Pattern Preservation**: The imputer learns missing patterns from training data for consistent imputation
-* **Memory Efficient**: Large datasets are processed in batches automatically
 
 ## Example Notebooks
 
