@@ -3,8 +3,8 @@ from mlimputer.evaluation.cross_validation import CrossValidator, CrossValidatio
 from mlimputer.evaluation.metrics import MetricsCalculator
 
 __all__ = [
-    'Evaluator',
-    'CrossValidator',
-    'CrossValidationConfig',
-    'MetricsCalculator',
+    "Evaluator",
+    "CrossValidator",
+    "CrossValidationConfig",
+    "MetricsCalculator",
 ]

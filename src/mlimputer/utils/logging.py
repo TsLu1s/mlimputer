@@ -18,8 +18,8 @@ class LogLevel(str, Enum):
 
 class MLImputerLogger:
     """Custom singleton logger for MLImputer."""
-    
-    _instance: Optional['MLImputerLogger'] = None
+
+    _instance: Optional["MLImputerLogger"] = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -27,21 +27,19 @@ class MLImputerLogger:
         return cls._instance
 
     def __init__(self):
-        if not hasattr(self, 'initialized'):
+        if not hasattr(self, "initialized"):
             self.logger = self._setup_logger()
             self.initialized = True
 
     def _setup_logger(self) -> logging.Logger:
-        logger = logging.getLogger('MLimputer')
+        logger = logging.getLogger("MLimputer")
         logger.setLevel(logging.DEBUG)
 
         if not logger.handlers:
             # Console handler
             console_handler = logging.StreamHandler(sys.stdout)
             console_handler.setLevel(logging.INFO)
-            console_format = logging.Formatter(
-                ' %(name)s - %(levelname)s - %(message)s'
-            )
+            console_format = logging.Formatter(" %(name)s - %(levelname)s - %(message)s")
             console_handler.setFormatter(console_format)
 
             # File handler
@@ -52,7 +50,7 @@ class MLImputerLogger:
             file_handler = RotatingFileHandler(log_file, maxBytes=5_000_000, backupCount=5)
             file_handler.setLevel(logging.DEBUG)
             file_format = logging.Formatter(
-                '%(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+                "%(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
             )
             file_handler.setFormatter(file_format)
 

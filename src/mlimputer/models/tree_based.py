@@ -3,9 +3,10 @@ from mlimputer.core.base import BaseImputationModel
 
 from typing import Optional
 
+
 class RandomForestImputation(BaseImputationModel):
     """Random Forest imputation model."""
-    
+
     def __init__(
         self,
         n_estimators: int = 100,
@@ -14,8 +15,8 @@ class RandomForestImputation(BaseImputationModel):
         max_depth: Optional[int] = None,
         min_samples_split: int = 2,
         min_samples_leaf: int = 1,
-        max_features: str = 'sqrt',
-        **kwargs
+        max_features: str = "sqrt",
+        **kwargs,
     ):
         super().__init__(
             n_estimators=n_estimators,
@@ -25,10 +26,10 @@ class RandomForestImputation(BaseImputationModel):
             min_samples_split=min_samples_split,
             min_samples_leaf=min_samples_leaf,
             max_features=max_features,
-            **kwargs
+            **kwargs,
         )
         self._initialize_model()
-    
+
     def _initialize_model(self) -> None:
         """Initialize Random Forest model."""
         self.model = RandomForestRegressor(**self.model_params)
@@ -36,7 +37,7 @@ class RandomForestImputation(BaseImputationModel):
 
 class ExtraTreesImputation(BaseImputationModel):
     """Extra Trees imputation model."""
-    
+
     def __init__(
         self,
         n_estimators: int = 100,
@@ -45,8 +46,8 @@ class ExtraTreesImputation(BaseImputationModel):
         max_depth: Optional[int] = None,
         min_samples_split: int = 2,
         min_samples_leaf: int = 1,
-        max_features: str = 'sqrt',
-        **kwargs
+        max_features: str = "sqrt",
+        **kwargs,
     ):
         super().__init__(
             n_estimators=n_estimators,
@@ -56,10 +57,10 @@ class ExtraTreesImputation(BaseImputationModel):
             min_samples_split=min_samples_split,
             min_samples_leaf=min_samples_leaf,
             max_features=max_features,
-            **kwargs
+            **kwargs,
         )
         self._initialize_model()
-    
+
     def _initialize_model(self) -> None:
         """Initialize Extra Trees model."""
         self.model = ExtraTreesRegressor(**self.model_params)
@@ -67,7 +68,7 @@ class ExtraTreesImputation(BaseImputationModel):
 
 class GBRImputation(BaseImputationModel):
     """Gradient Boosting imputation model."""
-    
+
     def __init__(
         self,
         n_estimators: int = 100,
@@ -76,8 +77,8 @@ class GBRImputation(BaseImputationModel):
         max_depth: int = 3,
         min_samples_split: int = 2,
         min_samples_leaf: int = 1,
-        loss: str = 'squared_error',
-        **kwargs
+        loss: str = "squared_error",
+        **kwargs,
     ):
         super().__init__(
             n_estimators=n_estimators,
@@ -87,10 +88,10 @@ class GBRImputation(BaseImputationModel):
             min_samples_split=min_samples_split,
             min_samples_leaf=min_samples_leaf,
             loss=loss,
-            **kwargs
+            **kwargs,
         )
         self._initialize_model()
-    
+
     def _initialize_model(self) -> None:
         """Initialize Gradient Boosting model."""
         self.model = GradientBoostingRegressor(**self.model_params)
