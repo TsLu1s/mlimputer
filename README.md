@@ -307,6 +307,16 @@ Comprehensive evaluation comparing multiple imputation strategies:
 
 [View Evaluation Example](https://github.com/TsLu1s/mlimputer/blob/main/examples/performance_evaluation.py)
 
+### 3. Detailed Analysis Example
+In-depth analysis of a single imputation strategy:
+- Column-wise missing data patterns
+- Fold-by-fold cross-validation results
+- Feature importance analysis
+- Test set predictions and metrics
+- Comprehensive performance reporting
+
+[View Detailed Analysis →](https://github.com/TsLu1s/MLimputer/blob/main/examples/singular_analysis.py)
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
